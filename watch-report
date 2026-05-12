@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# watch-report: Auto-compiles markdown to PDF on save using compile-report
+# Requires: entr, zathura (for viewing)
+
+if [ -z "$1" ]; then
+    echo "Usage: watch-report <file.md>"
+    exit 1
+fi
+
+FILE=$1
+PDF="${FILE%.md}.pdf"
+
+echo "Watching $FILE... (Press Ctrl+C to stop)"
+
+# Open zathura in the background if it's not already running for this file
+if ! pgrep -f "zathura $PDF" > /dev/null; then
+    zathura "$PDF" &
+fi
+
+# Use entr to watch the file and run compile-report
+# Note: we source .bashrc to make sure the function is available if run in a subshell
+echo "$FILE" | entr -s "source ~/.bashrc && compile-report $FILE"
